@@ -97,30 +97,49 @@ BOOL rotateBoardClockwise(int board[SIZE][SIZE])
 
 BOOL slideUp(int board[SIZE][SIZE])
 {
-    int* notZero = (int*)malloc(sizeof(int) * SIZE);
+    int *nonZeroNums = (int *)malloc(sizeof(int) * SIZE);
     int numNotZero;
-    for (int col = 0; col < SIZE; col++)
+    int i;
+    int val;
+    for (int row, col = 0; col < SIZE; col++)
     {
-        // Add two block of same number
-        for (int row = 0; row < SIZE - 1; row++){
-            if (board[col][row+1] == board[col][row]){
-                board[col][row] <<= 1;
-                board[col][row + 1] == 0;
-                row += 2;
-            }
-        }
-        // save number of numbers which != 0 in a column
+        row = 0;
         numNotZero = 0;
-        for(int row = 1; row < SIZE; row++){
-            if (board[col][row]){
-                notZero[numNotZero++] = board[col][row];
+        while(row < SIZE){
+            if (0 == board[row++][col]){
+                continue;
             }
+            // find 1st non-zero number
+            nonZeroNums[numNotZero++] = board[row-1][col];
+
+            while (row < SIZE)
+            {
+                if(0 == (val = board[row++][col])){
+                    continue;
+                }
+                // find 2nd non-zero number
+                if(board[row - 1][col] == nonZeroNums[numNotZero - 1]){
+                    nonZeroNums[numNotZero-1] <<= 1;
+                    break;
+                }
+                nonZeroNums[numNotZero++] = val;
+                // row;
+            }
+            
         }
-        // put all none zero numbers in a column of the board
-        for(int i = 0; i < numNotZero; i++){
-            board[col][i] = notZero[i];
+
+        // put all non-zero values in a column of the board
+        for (i = 0; i < numNotZero; i++)
+        {
+            board[i][col] = nonZeroNums[i];
+        }
+
+        for (; i < SIZE; i++)
+        {
+            board[i][col] = 0;
         }
     }
+    free(nonZeroNums);
 }
 
 BOOL slideLeft(int board[SIZE][SIZE])

@@ -1,0 +1,15 @@
+﻿  main.c
+D:\repos\Console2048\main.c(55,6): warning C4013: “up”未定义；假设外部返回 int
+D:\repos\Console2048\main.c(58,8): warning C4013: “down”未定义；假设外部返回 int
+D:\repos\Console2048\main.c(61,8): warning C4013: “left”未定义；假设外部返回 int
+D:\repos\Console2048\main.c(64,9): warning C4013: “right”未定义；假设外部返回 int
+D:\repos\Console2048\main.c(76,3): error C2143: 语法错误: 缺少“;”(在“default”的前面)
+D:\repos\Console2048\main.c(51,9): error C4996: 'getch': The POSIX name for this item is deprecated. Instead, use the ISO C and C++ conformant name: _getch. See online help for details.
+D:\repos\Console2048\main.c(88,15): warning C4047: “函数”:“const char *”与“int”的间接级别不同
+D:\repos\Console2048\main.c(88,15): warning C4024: “system”: 形参和实参 1 的类型不同
+D:\repos\Console2048\main.c(93,9): error C4996: 'getch': The POSIX name for this item is deprecated. Instead, use the ISO C and C++ conformant name: _getch. See online help for details.
+D:\repos\Console2048\main.c(128,23): warning C4013: “gameStart”未定义；假设外部返回 int
+D:\repos\Console2048\main.c(131,13): warning C4013: “lookUpRank”未定义；假设外部返回 int
+D:\repos\Console2048\main.c(141,21): warning C4047: “函数”:“PENV”与“int **”的间接级别不同
+D:\repos\Console2048\main.c(141,21): warning C4024: “GameInit”: 形参和实参 1 的类型不同
+D:\repos\Console2048\main.c(141,29): warning C4020: “GameInit”: 实参太多

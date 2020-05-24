@@ -19,11 +19,11 @@ int decodeRecord();
 
 void updateScreen();
 
-BOOL rotateBoardClockwise(int board[SIZE][SIZE]);
-BOOL slideLeft(int board[SIZE][SIZE]);
-BOOL slideRight(int board[SIZE][SIZE]);
-BOOL slideUp(int board[SIZE][SIZE]);
-BOOL slideDown(int board[SIZE][SIZE]);
+void rotateBoardClockwise(int board[SIZE][SIZE], int times);
+int slideLeft(int board[SIZE][SIZE]);
+int slideRight(int board[SIZE][SIZE]);
+int slideUp(int board[SIZE][SIZE]);
+int slideDown(int board[SIZE][SIZE]);
 
 BOOL GameInit(OUT PENV oldEnv)
 {
@@ -91,11 +91,42 @@ BOOL StartGame()
     }
 }
 
-BOOL rotateBoardClockwise(int board[SIZE][SIZE])
+void rotateBoardClockwise(int board[SIZE][SIZE], int times)
 {
+    // rotate square matrix, (not only 4 x 4 square)
+    if (0 == times || 4 == times)
+    {
+        return;
+    }
+    while (times--)
+    {
+        int step = 0;
+        int *tempArr = (int *)malloc(sizeof(int) * (SIZE - step - 1));
+        while (step < (SIZE / 2))
+        {
+            int i;
+            int j = 0;
+            for (i = SIZE - 1 - step; i > step; i--)
+                tempArr[j++] = board[i][SIZE - 1 - step];
+
+            for (i = SIZE - 1 - step; i > step; i--)
+                board[i][SIZE - 1 - step] = board[step][i];
+            for (i = SIZE - 1 - step; i > step; i--)
+                board[step][i] = board[SIZE - 1 - i][step];
+            for (i = step; i < SIZE - 1 - step; i++)
+                board[i][step] = board[SIZE - 1 - step][i];
+
+            j = 0;
+            for (i = step; i < SIZE - 1 - step; i++)
+            {
+                board[SIZE - 1 - step][i] = tempArr[j++];
+            }
+            step++;
+        }
+    }
 }
 
-BOOL slideUp(int board[SIZE][SIZE])
+int slideUp(int board[SIZE][SIZE])
 {
     int *nonZeroNums = (int *)malloc(sizeof(int) * SIZE);
     int numNotZero;
@@ -105,27 +136,30 @@ BOOL slideUp(int board[SIZE][SIZE])
     {
         row = 0;
         numNotZero = 0;
-        while(row < SIZE){
-            if (0 == board[row++][col]){
+        while (row < SIZE)
+        {
+            if (0 == board[row++][col])
+            {
                 continue;
             }
             // find 1st non-zero number
-            nonZeroNums[numNotZero++] = board[row-1][col];
+            nonZeroNums[numNotZero++] = board[row - 1][col];
 
             while (row < SIZE)
             {
-                if(0 == (val = board[row++][col])){
+                if (0 == (val = board[row++][col]))
+                {
                     continue;
                 }
                 // find 2nd non-zero number
-                if(board[row - 1][col] == nonZeroNums[numNotZero - 1]){
-                    nonZeroNums[numNotZero-1] <<= 1;
+                if (board[row - 1][col] == nonZeroNums[numNotZero - 1])
+                {
+                    nonZeroNums[numNotZero - 1] <<= 1;
                     break;
                 }
                 nonZeroNums[numNotZero++] = val;
                 // row;
             }
-            
         }
 
         // put all non-zero values in a column of the board
@@ -140,10 +174,6 @@ BOOL slideUp(int board[SIZE][SIZE])
         }
     }
     free(nonZeroNums);
-}
-
-BOOL slideLeft(int board[SIZE][SIZE])
-{
 }
 
 int selectionIn(const char **options, int numOfOptions)

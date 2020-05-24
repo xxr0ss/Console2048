@@ -176,6 +176,27 @@ int slideUp(int board[SIZE][SIZE])
     free(nonZeroNums);
 }
 
+int slideDown(int board[SIZE][SIZE]){
+    rotateBoardClockwise(board, 2);
+    int restZeros = slideUp(board);
+    rotateBoardClockwise(board, 2);
+    return restZeros;
+}
+
+int slideLeft(int board[SIZE][SIZE]){
+    rotateBoardClockwise(board, 1);
+    int restZeros = slideUp(board);
+    rotateBoardClockwise(board, 3);
+    return restZeros;
+}
+
+int slideRight(int board[SIZE][SIZE]){
+    rotateBoardClockwise(board, 3);
+    int restZeros = slideUp(board);
+    rotateBoardClockwise(board, 1);
+    return restZeros;
+}
+
 int selectionIn(const char **options, int numOfOptions)
 {
     int selection = 0;

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include <windows.h>
 #include <conio.h>
 #include "game.h"
@@ -7,7 +8,6 @@
 #define SIZE 4
 
 // Global data
-int state[SIZE][SIZE];
 int currentScore;
 int scoreRecord;
 
@@ -24,10 +24,19 @@ int slideLeft(int board[SIZE][SIZE]);
 int slideRight(int board[SIZE][SIZE]);
 int slideUp(int board[SIZE][SIZE]);
 int slideDown(int board[SIZE][SIZE]);
+void addNewValToBoard(int board[SIZE][SIZE], int restZeros);
 
-BOOL GameInit(OUT PENV oldEnv)
+BOOL GameInit(OUT PENV *oldEnv);
+
+BOOL GameInit(OUT int *** pboard,OUT PENV *pOldEnv)
 {
+    *pboard = (int**)malloc(sizeof(int*) * SIZE);
+    for(int i = 0; i < SIZE; i++){
+        pboard[i] = (int*)malloc(sizeof(int) * SIZE);
+    }
+    *pOldEnv = (PENV)malloc(sizeof(ENV));
     // hide cursor
+    srand((unsigned)time(NULL));
     GetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &oldEnv->cursorInfo);
     CONSOLE_CURSOR_INFO info = {1, 0}; // set cursor invisible
     SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &info);
@@ -46,50 +55,7 @@ BOOL ConsoleRecovery(IN PENV oldEnv)
     return SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &oldEnv->cursorInfo);
 }
 
-BOOL StartGame()
-{
-    BOOL willExit = FALSE;
-    int key, key_extra;
-    while (!willExit)
-    {
-        key = getch();
-        switch (key)
-        {
-        case 'w':
-        case 'W':
-            slideUp();
-        case 's':
-        case 'S':
-            slideDown();
-        case 'A':
-        case 'a':
-            slideLeft();
-        case 'D':
-        case 'd':
-            slideRight();
-        case 0xE0:
-            switch (key_extra = getch())
-            {
-            case 72:
-                printf("UP\n");
-                break;
-            case 80:
-                printf("DOWN\n");
-                break;
-            case 75:
-                printf("LEFT\n");
-                break;
-            case 77:
-                printf("RIGHT\n");
-                break;
-            default:
-                break;
-            }
-        default:
-            break;
-        }
-    }
-}
+
 
 void rotateBoardClockwise(int board[SIZE][SIZE], int times)
 {
@@ -176,25 +142,53 @@ int slideUp(int board[SIZE][SIZE])
     free(nonZeroNums);
 }
 
-int slideDown(int board[SIZE][SIZE]){
+int slideDown(int board[SIZE][SIZE])
+{
     rotateBoardClockwise(board, 2);
     int restZeros = slideUp(board);
     rotateBoardClockwise(board, 2);
     return restZeros;
 }
 
-int slideLeft(int board[SIZE][SIZE]){
+int slideLeft(int board[SIZE][SIZE])
+{
     rotateBoardClockwise(board, 1);
     int restZeros = slideUp(board);
     rotateBoardClockwise(board, 3);
     return restZeros;
 }
 
-int slideRight(int board[SIZE][SIZE]){
+int slideRight(int board[SIZE][SIZE])
+{
     rotateBoardClockwise(board, 3);
     int restZeros = slideUp(board);
     rotateBoardClockwise(board, 1);
     return restZeros;
+}
+
+void addNewValToBoard(int board[SIZE][SIZE], int restZeros)
+{
+    int pos = rand() % restZeros;
+    for (int i = 0; i < SIZE; i++)
+    {
+        for (int j = 0; j < SIZE; j++)
+        {
+            if (!board[i][j])
+            {
+                pos--;
+                if (!pos)
+                {
+                    int times = rand() % 2 ? 1 : 2;
+                    board[i][j] = 2 * times;
+                    break;
+                }
+            }
+        }
+        if (!pos)
+        {
+            break;
+        }
+    }
 }
 
 int selectionIn(const char **options, int numOfOptions)
@@ -243,6 +237,51 @@ int selectionIn(const char **options, int numOfOptions)
     return selection;
 }
 
+BOOL StartGame(int board[SIZE][SIZE])
+{
+    BOOL willExit = FALSE;
+    int key, key_extra;
+    while (!willExit)
+    {
+        key = getch();
+        switch (key)
+        {
+        case 'w':
+        case 'W':
+            slideUp(board);
+        case 's':
+        case 'S':
+            slideDown(board);
+        case 'A':
+        case 'a':
+            slideLeft(board);
+        case 'D':
+        case 'd':
+            slideRight(board);
+        case 0xE0:
+            switch (key_extra = getch())
+            {
+            case 72:
+                slideUp(board);
+                break;
+            case 80:
+                slideDown(board);
+                break;
+            case 75:
+                slideLeft(board);
+                break;
+            case 77:
+                slideRight(board);
+                break;
+            default:
+                break;
+            }
+        default:
+            break;
+        }
+    }
+}
+
 BOOL mainMenu()
 {
     BOOL willExit = FALSE;
@@ -262,9 +301,9 @@ BOOL mainMenu()
 
 int main()
 {
-    PENV oldEnv = (PENV)malloc(sizeof(ENV));
+    PENV oldEnv;
     int **board;
-    if (!GameInit(board, oldEnv))
+    if (!GameInit(&board, &oldEnv))
     {
         return EXIT_FAILURE;
     }
@@ -272,7 +311,7 @@ int main()
     BOOL willExit;
     do
     {
-        willExit = mainMenu();
+        willExit = mainMenu(board);
     } while (!willExit);
 
     return ConsoleRecovery(oldEnv);

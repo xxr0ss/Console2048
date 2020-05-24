@@ -11,7 +11,7 @@ typedef int **MATRIX;
 typedef MATRIX *PMATRIX;
 
 // Global data
-int boardSize = 4;
+int boardSize = 3;
 int currentScore;
 int scoreRecord;
 int restZeros;
@@ -183,17 +183,17 @@ void displayBoard(MATRIX board)
     system("cls");
 
     // DEBUG
-    for (int i = 0; i < boardSize; i++)
-    {
-        for (int j = 0; j < boardSize; j++)
-        {
-            printf("%2d ", board[i][j]);
-        }
-        printf("\n");
-    }
+    // for (int i = 0; i < boardSize; i++)
+    // {
+    //     for (int j = 0; j < boardSize; j++)
+    //     {
+    //         printf("%2d ", board[i][j]);
+    //     }
+    //     printf("\n");
+    // }
 
     printf(" - 2048 -\n");
-    printf("Highest score: %-d pts\nCurrent Score: %-d pts\n\n",
+    printf("Highest score: %-d pts\nCurrent score: %-d pts\n\n",
            scoreRecord, currentScore);
     char color[32];
     int row, col;
@@ -215,12 +215,14 @@ void displayBoard(MATRIX board)
             {
                 char valStr[8];
                 sprintf_s(valStr, 8, "%d", board[row][col]);
-                int t = 7 - strlen(valStr);
-                printf("%*s%s%*s", t - t / 2, "", valStr, t / 2, "");
+                int len = strlen(valStr);
+                // printf("%*s%s%*s", 7 - (7 - len) / 2 - len, "", valStr, (7 - len) / 2, "");
+                // 这样感觉更顺眼
+                printf("%*s%s%*s", (7 - len) / 2, "", valStr, 7 - (7 - len) / 2 - len, "");
             }
             else
             {
-                printf("       ");
+                printf("%3s.%3s", "", "");
             }
             resetColor();
         }
@@ -234,8 +236,8 @@ void displayBoard(MATRIX board)
         }
         printf("\n");
     }
-    printf("\nControl: WSAD or ←,↑,→,↓ to slide blocks");
-    printf("\n         Enter Q to return to home menu");
+    printf("\nControl: WSAD or ←,↑,→,↓");
+    printf("\n         Q to return");
 }
 
 void getColor(int val, char *buffer, int length)
@@ -250,7 +252,7 @@ void getColor(int val, char *buffer, int length)
         while ((val & 1) ^ 1)
         {
             val >>= 1;
-            color++;
+            color += 2;
         }
     }
     sprintf_s(buffer, length, "\033[38;5;%d;48;5;%dm",
@@ -267,9 +269,11 @@ BOOL StartGame(MATRIX board)
 
     displayBoard(board);
     BOOL willExit = FALSE;
+    BOOL newValNeeded;
     int key, key_extra;
     while (!willExit)
     {
+        newValNeeded = TRUE;
         key = _getch();
         switch (key)
         {
@@ -289,6 +293,9 @@ BOOL StartGame(MATRIX board)
         case 'd':
             slideRight(board);
             break;
+        case 'Q':
+        case 'q':
+            return TRUE;
         case 0xE0:
             switch (key_extra = _getch())
             {
@@ -305,14 +312,19 @@ BOOL StartGame(MATRIX board)
                 slideRight(board);
                 break;
             default:
-                break;
+                newValNeeded;
             }
+            break;
         default:
+            newValNeeded = FALSE;
             break;
         }
-        displayBoard(board);
-        addNewValToBoard(board);
-        displayBoard(board);
+        if (newValNeeded)
+        {
+
+            addNewValToBoard(board);
+            displayBoard(board);
+        }
     }
     return TRUE;
 }
@@ -370,7 +382,7 @@ BOOL mainMenu(MATRIX board)
     switch (selectionIn(options, 3))
     {
     case 0:
-        willExit = StartGame(board);
+        StartGame(board);
         // saveRecord();
         break;
     case 1:
@@ -378,6 +390,9 @@ BOOL mainMenu(MATRIX board)
         break;
     case 2:
         willExit = TRUE;
+        break;
+    default:
+        break;
     }
     return willExit;
 }

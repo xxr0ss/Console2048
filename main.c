@@ -27,14 +27,16 @@ int slideLeft(MATRIX board);
 int slideRight(MATRIX board);
 int slideUp(MATRIX board);
 int slideDown(MATRIX board);
+void resetBoard(MATRIX board);
 void addNewValToBoard(MATRIX board);
 
 void getColor(int val, char *buffer, int length);
 void resetColor();
 void displayBoard(MATRIX Board);
+int calCurrentScore(MATRIX Board);
 
 BOOL GameInit(OUT PMATRIX *pBoard, OUT PENV *pOldEnv);
-BOOL StartGame(MATRIX board);
+void StartGame(MATRIX board);
 
 void lookUpRank();
 
@@ -178,6 +180,28 @@ void addNewValToBoard(MATRIX board)
     }
 }
 
+void resetBoard(MATRIX board){
+    for(int i = 0; i < boardSize; i++)
+        memset(board[i], 0, sizeof(int) * boardSize);
+    restZeros = boardSize * boardSize;
+    // TODO: save current scure
+    currentScore = 0;
+    addNewValToBoard(board);
+}
+
+int calCurrentScore(MATRIX board){
+    currentScore = 0;
+    for(int i = 0; i < boardSize; i++){
+        for(int j = 0; j < boardSize; j++){
+            // score calculation rules: add up all values that is greater than 4
+            if (board[i][j] > 4){
+                currentScore += board[i][j];
+            }
+        }
+    }
+    return currentScore;
+}
+
 void displayBoard(MATRIX board)
 {
     system("cls");
@@ -191,8 +215,10 @@ void displayBoard(MATRIX board)
     //     }
     //     printf("\n");
     // }
+    currentScore = calCurrentScore(board);
+    scoreRecord = currentScore > scoreRecord ? currentScore : scoreRecord;
 
-    printf(" - 2048 -\n");
+    printf(" >> 2048 <<\n");
     printf("Highest score: %-d pts\nCurrent score: %-d pts\n\n",
            scoreRecord, currentScore);
     char color[32];
@@ -264,9 +290,8 @@ void resetColor()
     printf("\033[m");
 }
 
-BOOL StartGame(MATRIX board)
+void StartGame(MATRIX board)
 {
-
     displayBoard(board);
     BOOL willExit = FALSE;
     BOOL newValNeeded;
@@ -329,7 +354,7 @@ BOOL StartGame(MATRIX board)
     return TRUE;
 }
 
-int selectionIn(const char **options, int numOfOptions)
+int menuSelectionIn(const char **options, int numOfOptions)
 {
     int selection = 0;
     int key;
@@ -375,31 +400,60 @@ int selectionIn(const char **options, int numOfOptions)
     return selection;
 }
 
-BOOL mainMenu(MATRIX board)
+int mainMenu(MATRIX board, int signal)
 {
-    BOOL willExit = FALSE;
-    const char *options[] = {"开始游戏", "查看排名", "退出游戏"};
-    switch (selectionIn(options, 3))
+    const char *allOptions[] = {"开始游戏", "继续游戏", "查看排名", "退出游戏"};
+    const char *lessOptions[] = {allOptions[0], allOptions[2], allOptions[3]};
+
+    if (START_NEW == signal)
     {
-    case 0:
-        StartGame(board);
-        // saveRecord();
-        break;
-    case 1:
-        // lookUpRank();
-        break;
-    case 2:
-        willExit = TRUE;
-        break;
-    default:
-        break;
+        switch (menuSelectionIn(lessOptions, 3))
+        {
+        case 0:
+            StartGame(board);
+            break;
+        case 1:
+            // TODO: lookupRank();
+            break;
+
+        case 2:
+            return WANT_TO_EXIT;
+            break;
+        default:
+            break;
+        }
+        return ALREADY_STARTED;
     }
-    return willExit;
+    else if (ALREADY_STARTED)
+    {
+        switch (menuSelectionIn(allOptions, 4))
+        {
+        case 0:
+            resetBoard(board);
+            // goes down
+        case 1:
+            StartGame(board);
+            break;
+        case 2:
+            // TODO: lookupRank();
+            break;
+        case 3:
+            return WANT_TO_EXIT;
+        default:
+            break;
+        }
+        return ALREADY_STARTED;
+    }
+    else
+    {
+        printf("[!] ERROR: not valid signal value: %d\n", signal);
+        return WANT_TO_EXIT;
+    }
 }
 
 BOOL GameInit(OUT PMATRIX *ppBoard, OUT PENV *pOldEnv)
 {
-
+    // TODO: 考虑改成连续数组
     MATRIX board = (MATRIX)malloc(sizeof(int *) * boardSize);
     for (int i = 0; i < boardSize; i++)
     {
@@ -409,13 +463,14 @@ BOOL GameInit(OUT PMATRIX *ppBoard, OUT PENV *pOldEnv)
     *ppBoard = &board;
 
     srand((unsigned)time(NULL));
-    restZeros = 16;
+    restZeros = boardSize * boardSize;
     addNewValToBoard(board);
 
     // hide cursor after save origin settings
-    PENV oldEnv = *pOldEnv;
-    oldEnv = (PENV)malloc(sizeof(ENV));
+    PENV oldEnv = (PENV)malloc(sizeof(ENV));
     GetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &oldEnv->cursorInfo);
+    *pOldEnv = oldEnv;
+
     CONSOLE_CURSOR_INFO info = {1, 0}; // set cursor invisible
     SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &info);
 
@@ -445,17 +500,25 @@ BOOL ConsoleRecovery(IN PENV oldEnv)
 
 int main()
 {
-    PENV oldEnv;
     PMATRIX pBoard;
+    PENV oldEnv;
+    int signal = START_NEW;
+
     if (!GameInit(&pBoard, &oldEnv))
         return EXIT_FAILURE;
+
     MATRIX board = *pBoard;
-
-    BOOL willExit;
-    do
+    while (1)
     {
-        willExit = mainMenu(board);
-    } while (!willExit);
+        signal = mainMenu(board, signal);
+        if (WANT_TO_EXIT == signal)
+        {
+            ConsoleRecovery(oldEnv);
+            system("cls");
+            printf("\n\n\tSee you next time!");
+            exit(0);
+        }
+    }
 
-    return ConsoleRecovery(oldEnv);
+    return 0;
 }

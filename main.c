@@ -11,10 +11,15 @@ typedef int **MATRIX;
 typedef MATRIX *PMATRIX;
 
 // Global data
-int boardSize = 2;
+int boardSize = 4;
 int currentScore;
 int scoreRecord;
 int restZeros;
+
+// DEBUG global
+int arr[1024] = {0};
+int arrptr = 0;
+// DEBUG
 
 int saveRecord();
 int readRecord();
@@ -27,7 +32,7 @@ int slideLeft(MATRIX board);
 int slideRight(MATRIX board);
 int slideUp(MATRIX board);
 int slideDown(MATRIX board);
-void resetBoard(MATRIX board);
+void clearBoard(MATRIX board);
 void addNewValToBoard(MATRIX board);
 
 void getColor(int val, char *buffer, int length);
@@ -36,7 +41,7 @@ void displayBoard(MATRIX Board);
 int calCurrentScore(MATRIX Board);
 
 BOOL GameInit(OUT PMATRIX *pBoard, OUT PENV *pOldEnv);
-BOOL StartGame(MATRIX board);
+BOOL runGame(MATRIX board, BOOL newGame);
 
 void lookUpRank();
 
@@ -158,44 +163,45 @@ int slideRight(MATRIX board)
 void addNewValToBoard(MATRIX board)
 {
     int pos = rand() % restZeros;
-    restZeros -= 1;
-    for (int i = 0; i < boardSize; i++)
+    int *board1D = board[0];
+    for (int i = 0; i < boardSize * boardSize; i++)
     {
-        for (int j = 0; j < boardSize; j++)
+        if (!board1D[i])
         {
-            if (!board[i][j])
+            if (!pos)
             {
-                pos--;
-                if (!pos)
-                {
-                    int times = rand() % 2 ? 1 : 2;
-                    board[i][j] = 2 * times;
-                    break;
-                }
+                int times = (rand() % 3) ? 1 : 2; // possibility of 2: 2/3
+                //DEBUG
+                arr[arrptr++] = times;
+                //DEBUG
+                board1D[i] = 2 * times;
+                restZeros -= 1;
+                break;
             }
-        }
-        if (!pos)
-        {
-            break;
+            pos--;
         }
     }
 }
 
-void resetBoard(MATRIX board){
-    for(int i = 0; i < boardSize; i++)
+void clearBoard(MATRIX board)
+{
+    for (int i = 0; i < boardSize; i++)
         memset(board[i], 0, sizeof(int) * boardSize);
     restZeros = boardSize * boardSize;
     // TODO: save current scure
     currentScore = 0;
-    addNewValToBoard(board);
 }
 
-int calCurrentScore(MATRIX board){
+int calCurrentScore(MATRIX board)
+{
     currentScore = 0;
-    for(int i = 0; i < boardSize; i++){
-        for(int j = 0; j < boardSize; j++){
+    for (int i = 0; i < boardSize; i++)
+    {
+        for (int j = 0; j < boardSize; j++)
+        {
             // score calculation rules: add up all values that is greater than 4
-            if (board[i][j] > 4){
+            if (board[i][j] > 4)
+            {
                 currentScore += board[i][j];
             }
         }
@@ -206,7 +212,7 @@ int calCurrentScore(MATRIX board){
 void displayBoard(MATRIX board)
 {
     system("cls");
-
+    int paddinglen;
     // DEBUG
     // for (int i = 0; i < boardSize; i++)
     // {
@@ -216,12 +222,22 @@ void displayBoard(MATRIX board)
     //     }
     //     printf("\n");
     // }
+    // DEBUG
     currentScore = calCurrentScore(board);
     scoreRecord = currentScore > scoreRecord ? currentScore : scoreRecord;
 
     // DEBUG
-    printf("[*] restZeros: %d", restZeros);
-    printf(" >> 2048 <<\n");
+    printf("[*] restZeros: %d\n", restZeros);
+    printf("[*] arr: ");
+    for (int i = 0; i < arrptr; i++)
+    {
+        printf("%d, ", arr[i]);
+    }
+    printf("\n\n");
+    // DEBUG
+    paddinglen = (boardSize * 7) / 2 - 5;
+    paddinglen = paddinglen > 0 ? paddinglen : 0;
+    printf("%*s", paddinglen, ">> 2048 <<\n");
     printf("Highest score: %-d pts\nCurrent score: %-d pts\n\n",
            scoreRecord, currentScore);
     char color[32];
@@ -293,13 +309,14 @@ void resetColor()
     printf("\033[m");
 }
 
-BOOL StartGame(MATRIX board)
+BOOL runGame(MATRIX board, BOOL newGame)
 {
-    displayBoard(board);
-    BOOL gameOver = FALSE;
-    BOOL newValNeeded;
+    BOOL newValNeeded = TRUE;
     int key, key_extra;
-    while (!gameOver)
+    if (newGame)
+        addNewValToBoard(board);
+    displayBoard(board);
+    while (restZeros > 1)
     {
         newValNeeded = TRUE;
         key = _getch();
@@ -345,21 +362,23 @@ BOOL StartGame(MATRIX board)
             break;
         default:
             newValNeeded = FALSE;
+            fflush(stdin);
             break;
         }
         if (newValNeeded)
         {
-
             addNewValToBoard(board);
-            displayBoard(board);
-            gameOver = restZeros ? FALSE : TRUE;
         }
+        displayBoard(board);
     }
-    system("cls");
-    printf("\n\n     - GAME OVER -\n\n");
-    printf("     your score: %d\n     PRESS ANY KEY   \n", currentScore);
-    key = getchar();
-    return gameOver;
+    // system("cls");
+    int paddinglen = (boardSize * 7) / 2 - 5;
+    paddinglen = paddinglen > 0 ? paddinglen : 0;
+    printf("\n\n- GAME OVER -\n\n");
+    printf("your score: %-d\nPRESS ANY KEY\n", currentScore);
+    key = _getch();
+    fflush(stdin);
+    return TRUE;
 }
 
 int menuSelectionIn(const char **options, int numOfOptions)
@@ -408,69 +427,69 @@ int menuSelectionIn(const char **options, int numOfOptions)
     return selection;
 }
 
-int mainMenu(MATRIX board, int signal)
+BOOL homeMenu(MATRIX board)
 {
+    // DEBUG
+    memset(arr, 0, 1024);
+    arrptr = 0;
+    // DEBUG
     const char *allOptions[] = {"开始游戏", "继续游戏", "查看排名", "退出游戏"};
     const char *lessOptions[] = {allOptions[0], allOptions[2], allOptions[3]};
-    BOOL gameOver = FALSE;
-    if (START_NEW == signal)
+    BOOL alreadyStarted = FALSE;
+    while (1)
     {
-        switch (menuSelectionIn(lessOptions, 3))
+        if (alreadyStarted)
         {
-        case 0:
-            gameOver = StartGame(board);
-            signal = gameOver ? START_NEW : ALREADY_STARTED;
-            break;
-        case 1:
-            // TODO: lookupRank();
-            break;
-
-        case 2:
-            signal = WANT_TO_EXIT;
-            break;
+            switch (menuSelectionIn(allOptions, 4))
+            {
+            case 0:
+                clearBoard(board);
+                runGame(board, TRUE);
+                break;
+            case 1:
+                runGame(board, FALSE);
+                break;
+            case 2:
+                // lookupRank();
+            case 3:
+                return TRUE;
+            }
+        }
+        else
+        {
+            switch (menuSelectionIn(lessOptions, 3))
+            {
+            case 0:
+                clearBoard(board);
+                runGame(board, TRUE);
+                break;
+            case 1:
+                // TODO: lookupRank();
+                break;
+            case 2:
+                return TRUE;
+            default:
+                break;
+            }
+            alreadyStarted = TRUE;
         }
     }
-    else if (ALREADY_STARTED)
-    {
-        switch (menuSelectionIn(allOptions, 4))
-        {
-        case 0:
-            resetBoard(board);
-            // goes down
-        case 1:
-            gameOver = StartGame(board);
-            if(gameOver)
-                signal = START_NEW;
-            break;
-        case 2:
-            // TODO: lookupRank();
-            break;
-        case 3:
-            signal = WANT_TO_EXIT;
-            break;
-        }
-    }
-    else
-    {
-        printf("[!] ERROR: not valid signal value: %d\n", signal);
-        signal = WANT_TO_EXIT;
-    }
-    return signal;
+    return TRUE;
 }
 
 BOOL GameInit(OUT PMATRIX *ppBoard, OUT PENV *pOldEnv)
 {
-    MATRIX board = (MATRIX)calloc(boardSize, sizeof(int*));
-    board[0] = (int*)calloc(boardSize * boardSize, sizeof(int));
-    for(int i = 0; i < boardSize; i++){
+    MATRIX board = (MATRIX)calloc(boardSize, sizeof(int *));
+    board[0] = (int *)calloc(boardSize * boardSize, sizeof(int));
+    for (int i = 0; i < boardSize; i++)
+    {
         board[i] = board[0] + boardSize * i;
     }
-    
+
     *ppBoard = &board;
 
     srand((unsigned)time(NULL));
     restZeros = boardSize * boardSize;
-    addNewValToBoard(board);
 
     // hide cursor after save origin settings
     PENV oldEnv = (PENV)malloc(sizeof(ENV));
@@ -482,7 +501,7 @@ BOOL GameInit(OUT PMATRIX *ppBoard, OUT PENV *pOldEnv)
 
     // TODO: add "read score record from file" function
     // Read record from file, and maybe decrypt it before read record
-    scoreRecord = 100; // assuming the highest score record
+    scoreRecord = 0; // assuming the highest score record
     currentScore = 0;
 
     // DEBUG
@@ -508,23 +527,28 @@ int main()
 {
     PMATRIX pBoard;
     PENV oldEnv;
-    int signal = START_NEW;
+    int flag = START_NEW;
 
     if (!GameInit(&pBoard, &oldEnv))
         return EXIT_FAILURE;
 
     MATRIX board = *pBoard;
-    while (1)
-    {
-        signal = mainMenu(board, signal);
-        if (WANT_TO_EXIT == signal)
-        {
-            restoreEnv(oldEnv);
-            system("cls");
-            printf("\n\n\tSee you next time!\n\n");
-            exit(0);
-        }
-    }
+    // while (1)
+    // {
+    //     flag = mainMenu(board, flag);
+    //     if (WANT_TO_EXIT == flag)
+    //     {
+    //         restoreEnv(oldEnv);
+    //         system("cls");
+    //         printf("\n\n\tSee you next time!\n\n");
+    //         exit(0);
+    //     }
+    // }
 
+    homeMenu(board);
+    restoreEnv(oldEnv);
+    system("cls");
+    printf("\n\n\tSee you next time!\n\n");
+    exit(0);
     return 0;
 }

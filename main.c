@@ -8,18 +8,16 @@
 
 // NOTE: maybe it's better to set "PMATRIX board" as global variable;
 
-// Global data
 int boardSize = 4;
 int currentScore;
 int scoreRecord;
 int restZeros;
 
+/* Data control */
 int saveRecord();
 int readRecord();
 
-int encodeRecord();
-int decodeRecord();
-
+/* Funtions act on the board */
 MATRIX createEmptyBoard();
 void freeBoard(MATRIX board);
 void rotateBoardClockwise(MATRIX board, int times);
@@ -27,19 +25,21 @@ int slideLeft(MATRIX board);
 int slideRight(MATRIX board);
 int slideUp(MATRIX board);
 int slideDown(MATRIX board);
-BOOL canSlide(MATRIX board);
 void clearBoard(MATRIX board);
 void addNewValToBoard(MATRIX board);
 
+/* Display related */
 void getColor(int val, char *buffer, int length);
 void resetColor();
 void displayBoard(MATRIX Board);
 int calCurrentScore(MATRIX Board);
 
+/* Game environment related */
 BOOL GameInit(OUT PMATRIX *pBoard, OUT PENV *pOldEnv);
 BOOL runGame(MATRIX board, BOOL newGame);
-
 void lookUpRank();
+
+
 
 MATRIX createEmptyBoard()
 {
@@ -175,31 +175,6 @@ int slideRight(MATRIX board)
     return restZeros;
 }
 
-BOOL canSlide(const MATRIX board)
-{
-    BOOL result = FALSE;
-    int originRestZeros = restZeros;
-    MATRIX testBoard = createEmptyBoard();
-    int rotateTimes = 0;
-    while (rotateTimes <= 3)
-    {
-        memcpy_s(testBoard[0], boardSize * boardSize,
-                 board[0], boardSize * boardSize);
-        rotateBoardClockwise(testBoard, rotateTimes);
-        if (originRestZeros != slideUp(testBoard))
-        {
-            // when got one direction that the board will have different
-            // restZeros, player can slide;
-            result = TRUE;
-            break;
-        }
-    }
-
-    freeBoard(testBoard);
-    restZeros = originRestZeros;
-    return result;
-}
-
 void addNewValToBoard(MATRIX board)
 {
     int pos = rand() % restZeros;
@@ -249,10 +224,6 @@ int calCurrentScore(MATRIX board)
 void displayBoard(MATRIX board)
 {
     system("cls");
-
-    // DEBUG
-    printf("[*] restZeros %d\n", restZeros);
-    // DEBUG
 
     currentScore = calCurrentScore(board);
     scoreRecord = currentScore > scoreRecord ? currentScore : scoreRecord;
@@ -334,7 +305,6 @@ void resetColor()
 
 BOOL runGame(MATRIX board, BOOL newGame)
 {
-    // BUG: will "gameover" when player can still slide
     BOOL newValNeeded = TRUE;
     int key, key_extra;
     if (newGame)
@@ -393,13 +363,6 @@ BOOL runGame(MATRIX board, BOOL newGame)
         {
             addNewValToBoard(board);
         }
-        // if (restZeros <= 1)
-        // {
-        //     if (!canSlide(board))
-        //     {
-        //         break;
-        //     }
-        // }
         if (restZeros < 1){
             break;
         }
@@ -407,11 +370,14 @@ BOOL runGame(MATRIX board, BOOL newGame)
     }
 
     // system("cls");
-    int paddinglen = (boardSize * 7) / 2 - 5;
+    int paddinglen = (boardSize * 7) / 2 - 6;
     paddinglen = paddinglen > 0 ? paddinglen : 0;
     printf("\n\n%*s- GAME OVER -\n\n", paddinglen, "");
     printf("your score: %-d\nPRESS ANY KEY\n", currentScore);
     key = _getch();
+    // When player holds a direction key until gameover, sleep for 0.7s
+    // makes it more natural
+    Sleep(700);
     fflush(stdin);
     return TRUE;
 }

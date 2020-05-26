@@ -1,3 +1,1 @@
-﻿  main.c
-D:\repos\Console2048\main.c(263,1): warning C4267: “初始化”: 从“size_t”转换到“int”，可能丢失数据
-  Console2048.vcxproj -> D:\repos\Console2048\x64\Debug\Console2048.exe
+﻿  Console2048.vcxproj -> D:\repos\Console2048\x64\Debug\Console2048.exe

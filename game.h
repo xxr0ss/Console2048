@@ -11,5 +11,9 @@ typedef struct _ENV{
 	CONSOLE_CURSOR_INFO cursorInfo;
 } ENV, *PENV;
 
+typedef struct _SETTINGS {
+	int boardSize;
+}SETTINGS, *PSETTINGS;
+
 typedef int **MATRIX;
 typedef MATRIX *PMATRIX;

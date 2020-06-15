@@ -23,6 +23,8 @@ void useTestCase(MATRIX board) {
 /* Data control */
 int saveRecord();
 int readRecord();
+int saveSettings(SETTINGS settings);
+SETTINGS readSettings();
 
 /* Funtions act on the board */
 MATRIX createEmptyBoard();
@@ -41,11 +43,16 @@ void getColor(int val, char* buffer, int length);
 void resetColor();
 void displayBoard(MATRIX Board);
 int calCurrentScore(MATRIX Board);
+int settingsMenu();
 
 /* Game environment related */
 BOOL GameInit(OUT PMATRIX* pBoard, OUT PENV* pOldEnv);
 BOOL runGame(MATRIX board, BOOL newGame);
 void lookUpRank();
+
+int saveSettings(s) {
+
+}
 
 MATRIX createEmptyBoard()
 {
@@ -212,7 +219,7 @@ BOOL canSlide(const MATRIX board)
 
 BOOL addNewValToBoard(MATRIX board)
 {
-    BOOL result = FALSE;
+	BOOL result = FALSE;
 	if (restZeros == 0) {
 		return result;
 	}
@@ -227,7 +234,7 @@ BOOL addNewValToBoard(MATRIX board)
 				int times = (rand() % 3) ? 1 : 2; // possibility of 2: 2/3
 				board1D[i] = 2 * times;
 				restZeros -= 1;
-                result = TRUE;
+				result = TRUE;
 				break;
 			}
 			pos--;
@@ -433,14 +440,14 @@ int menuSelection(const char** options, int numOfOptions)
 	int selection = 0;
 	int key;
 	int key_extra;
-	const char* prefix = "*";
+	const char* selection_char = ">";
 	do
 	{
 		system("cls");
 		for (int i = 0; i < numOfOptions; i++)
 		{
 			printf("\n\n");
-			printf("\t%s %s\n", i == selection ? prefix : " ", options[i]);
+			printf("\t%s %s\n", i == selection ? selection_char : " ", options[i]);
 		}
 		key = _getch();
 		switch (key)
@@ -494,6 +501,9 @@ BOOL homeMenu(MATRIX board)
 			case 2:
 				// lookupRank();
 			case 3:
+				settingsMenu();
+				break;
+			case 4:
 				return TRUE;
 			}
 		}
@@ -510,6 +520,9 @@ BOOL homeMenu(MATRIX board)
 				// TODO: lookupRank();
 				break;
 			case 2:
+				settingsMenu();
+				break;
+			case 3:
 				return TRUE;
 			default:
 				break;
@@ -518,6 +531,64 @@ BOOL homeMenu(MATRIX board)
 		}
 	}
 	return TRUE;
+}
+
+int settingsMenu() {
+	SETTINGS settings;
+	int key, key_extra;
+	int newSize = boardSize;
+	BOOL confirm = FALSE;
+	while (!confirm) {
+		system("cls");
+		printf("\n\n");
+		printf("\t           %s\n", newSize < 8 ? "△":" ");
+		printf("\t桌面大小   %2d\n", newSize);
+		printf("\t           %s\n", newSize > 2? "▽" : " ");
+		key = _getch();
+		switch (key)
+		{
+		case 'w':
+		case 'W':
+			if (newSize < 8) {
+				newSize++;
+			}
+			break;
+		case 's':
+		case 'S':
+			if (newSize > 2) {
+				newSize--;
+			}
+			break;
+		case 0xE0:
+			// ↑, ↓ keys generates a key and a key_extra
+			switch (key_extra = _getch())
+			{
+			case 72:
+				if (newSize < 8) {
+					newSize++;
+				}
+				break;
+			case 80:
+				if (newSize > 2) {
+					newSize--;
+				}
+				break;
+			}
+			break;
+		case 0x0D:
+			confirm = TRUE;
+		}
+	}
+	if (newSize == boardSize) {
+		printf("设置未更改");
+	}
+	else {
+		settings.boardSize = newSize;
+		saveSettings(settings);
+		printf("更改将在下次游戏时生效");
+	}
+	Sleep(1000);
+	return newSize == boardSize;
 }
 
 BOOL GameInit(OUT PMATRIX pBoard, OUT PENV* pOldEnv)

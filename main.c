@@ -499,11 +499,9 @@ BOOL homeMenu(MATRIX board)
 				runGame(board, FALSE);
 				break;
 			case 2:
-				// lookupRank();
-			case 3:
 				settingsMenu();
 				break;
-			case 4:
+			case 3:
 				return TRUE;
 			}
 		}
@@ -517,12 +515,9 @@ BOOL homeMenu(MATRIX board)
 				gameOver = runGame(board, TRUE);
 				break;
 			case 1:
-				// TODO: lookupRank();
-				break;
-			case 2:
 				settingsMenu();
 				break;
-			case 3:
+			case 2:
 				return TRUE;
 			default:
 				break;
@@ -585,7 +580,7 @@ int settingsMenu() {
 	else {
 		settings.boardSize = newSize;
 		saveSettings(settings);
-		printf("更改将在下次游戏时生效");
+		printf("更改将在下次游戏时生效， 正在返回主界面");
 	}
 	Sleep(1000);
 	return newSize == boardSize;

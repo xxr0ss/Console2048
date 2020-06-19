@@ -1,2 +1,0 @@
-D:\repos\Console2048\x64\Debug\Console2048.exe
-D:\repos\Console2048\x64\Debug\Console2048.pdb

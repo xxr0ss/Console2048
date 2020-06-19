@@ -1,5 +1,5 @@
 #pragma once
 
 /* main menu strings */
-const char* allOptions[] = { "Е╪─Е╖▀Ф╦╦Ф┬▐", "Г╩╖Г╩╜Ф╦╦Ф┬▐", "Х╝╬Г╫╝","И──Е┤╨Ф╦╦Ф┬▐" };
-const char* lessOptions[] = { "Е╪─Е╖▀Ф╦╦Ф┬▐", "Х╝╬Г╫╝","И──Е┤╨Ф╦╦Ф┬▐" }
+const char *allOptions[] = {"©╙й╪сно╥", "╪лпЬсно╥", "╡И©╢еецШ", "иХжц", "мкЁЖсно╥"};
+const char *lessOptions[] = { "©╙й╪сно╥", "╡И©╢еецШ","иХжц", "мкЁЖсно╥" };

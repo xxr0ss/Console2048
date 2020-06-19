@@ -306,7 +306,7 @@ void displayBoard(MATRIX board)
 				sprintf_s(valStr, 8, "%d", board[row][col]);
 				int len = strlen(valStr);
 				// printf("%*s%s%*s", 7 - (7 - len) / 2 - len, "", valStr, (7 - len) / 2, "");
-				// ?????о??????
+				// 这样感觉更顺眼
 				printf("%*s%s%*s", (7 - len) / 2, "", valStr, 7 - (7 - len) / 2 - len, "");
 			}
 			else
@@ -325,7 +325,7 @@ void displayBoard(MATRIX board)
 		}
 		printf("\n");
 	}
-	printf("\nControl: WSAD or ??,??,??,??");
+	printf("\nControl: WSAD or ←,↑,→,↓");
 	printf("\n         Q to return");
 }
 
@@ -461,7 +461,7 @@ int menuSelection(const char** options, int numOfOptions)
 			selection = (selection + 1) % numOfOptions;
 			continue;
 		case 0xE0:
-			// ??, ?? keys generates a key and a key_extra
+			// ↑, ↓ keys generates a key and a key_extra
 			switch (key_extra = _getch())
 			{
 			case 72:
@@ -499,9 +499,11 @@ BOOL homeMenu(MATRIX board)
 				runGame(board, FALSE);
 				break;
 			case 2:
+				// lookupRank();
+			case 3:
 				settingsMenu();
 				break;
-			case 3:
+			case 4:
 				return TRUE;
 			}
 		}
@@ -515,9 +517,12 @@ BOOL homeMenu(MATRIX board)
 				gameOver = runGame(board, TRUE);
 				break;
 			case 1:
-				settingsMenu();
+				// TODO: lookupRank();
 				break;
 			case 2:
+				settingsMenu();
+				break;
+			case 3:
 				return TRUE;
 			default:
 				break;
@@ -536,9 +541,9 @@ int settingsMenu() {
 	while (!confirm) {
 		system("cls");
 		printf("\n\n");
-		printf("\t           %s\n", newSize < 8 ? "??":" ");
-		printf("\t?????С   %2d\n", newSize);
-		printf("\t           %s\n", newSize > 2? "??" : " ");
+		printf("\t           %s\n", newSize < 8 ? "△":" ");
+		printf("\t桌面大小   %2d\n", newSize);
+		printf("\t           %s\n", newSize > 2? "▽" : " ");
 		key = _getch();
 		switch (key)
 		{
@@ -555,7 +560,7 @@ int settingsMenu() {
 			}
 			break;
 		case 0xE0:
-			// ??, ?? keys generates a key and a key_extra
+			// ↑, ↓ keys generates a key and a key_extra
 			switch (key_extra = _getch())
 			{
 			case 72:
@@ -575,12 +580,12 @@ int settingsMenu() {
 		}
 	}
 	if (newSize == boardSize) {
-		printf("????δ????");
+		printf("设置未更改");
 	}
 	else {
 		settings.boardSize = newSize;
 		saveSettings(settings);
-		printf("????????????????Ч");
+		printf("更改将在下次游戏时生效");
 	}
 	Sleep(1000);
 	return newSize == boardSize;
@@ -606,7 +611,7 @@ BOOL GameInit(OUT PMATRIX pBoard, OUT PENV* pOldEnv)
 	scoreRecord = 0; // assuming the highest score record
 	currentScore = 0;
 
-	return SetConsoleTitleW(L"??????2048");
+	return SetConsoleTitleW(L"进击的2048");
 }
 
 BOOL restoreEnv(IN PENV oldEnv)

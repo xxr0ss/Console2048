@@ -6,3 +6,7 @@
 *.db
 *.suo
 Console2048.zip
+
+x64
+Debug
+test1

@@ -499,11 +499,9 @@ BOOL homeMenu(MATRIX board)
 				runGame(board, FALSE);
 				break;
 			case 2:
-				// lookupRank();
-			case 3:
 				settingsMenu();
 				break;
-			case 4:
+			case 3:
 				return TRUE;
 			}
 		}
@@ -517,12 +515,9 @@ BOOL homeMenu(MATRIX board)
 				gameOver = runGame(board, TRUE);
 				break;
 			case 1:
-				// TODO: lookupRank();
-				break;
-			case 2:
 				settingsMenu();
 				break;
-			case 3:
+			case 2:
 				return TRUE;
 			default:
 				break;

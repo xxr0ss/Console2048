@@ -1,0 +1,8 @@
+*.pdb
+*.obj
+*.idb
+*.log
+*.ilk
+*.db
+*.suo
+Console2048.zip

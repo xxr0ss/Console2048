@@ -13,8 +13,6 @@ int currentScore;
 int scoreRecord;
 int restZeros;
 
-<<<<<<< HEAD
-=======
 // DEBUG
 int testCase[] = { 7, 8, 9, 10, 6, 7, 8, 9, 5,6,7,8, 4,5,6,7 };
 void useTestCase(MATRIX board) {
@@ -22,7 +20,6 @@ void useTestCase(MATRIX board) {
 	memcpy_s(board[0], size, testCase, size);
 }
 
->>>>>>> testCommonLogical
 /* Data control */
 int saveRecord();
 int readRecord();
@@ -42,24 +39,13 @@ BOOL canSlide(MATRIX board);
 BOOL addNewValToBoard(MATRIX board);
 
 /* Display related */
-<<<<<<< HEAD
-void getColor(int val, char *buffer, int length);
-=======
 void getColor(int val, char* buffer, int length);
->>>>>>> testCommonLogical
 void resetColor();
 void displayBoard(MATRIX Board);
 int calCurrentScore(MATRIX Board);
 int settingsMenu();
 
 /* Game environment related */
-<<<<<<< HEAD
-BOOL GameInit(OUT PMATRIX *pBoard, OUT PENV *pOldEnv);
-BOOL runGame(MATRIX board, BOOL newGame);
-void lookUpRank();
-
-
-=======
 BOOL GameInit(OUT PMATRIX* pBoard, OUT PENV* pOldEnv);
 BOOL runGame(MATRIX board, BOOL newGame);
 void lookUpRank();
@@ -67,7 +53,6 @@ void lookUpRank();
 int saveSettings(s) {
 
 }
->>>>>>> testCommonLogical
 
 MATRIX createEmptyBoard()
 {
@@ -203,9 +188,6 @@ int slideRight(MATRIX board)
 	return restZeros;
 }
 
-<<<<<<< HEAD
-void addNewValToBoard(MATRIX board)
-=======
 BOOL canSlide(const MATRIX board)
 {
 	// TODO: write test cases
@@ -236,7 +218,6 @@ BOOL canSlide(const MATRIX board)
 }
 
 BOOL addNewValToBoard(MATRIX board)
->>>>>>> testCommonLogical
 {
 	BOOL result = FALSE;
 	if (restZeros == 0) {
@@ -290,62 +271,6 @@ int calCurrentScore(MATRIX board)
 
 void displayBoard(MATRIX board)
 {
-<<<<<<< HEAD
-    system("cls");
-
-    currentScore = calCurrentScore(board);
-    scoreRecord = currentScore > scoreRecord ? currentScore : scoreRecord;
-
-    int paddinglen;
-    paddinglen = (boardSize * 7) / 2 - 5;
-    paddinglen = paddinglen > 0 ? paddinglen : 0;
-    printf("\n\n%*s> 2048 <\n", paddinglen, "");
-    printf("Highest score: %-d pts\nCurrent score: %-d pts\n\n",
-           scoreRecord, currentScore);
-    char color[32];
-    int row, col;
-    for (row = 0; row < boardSize; row++)
-    {
-        for (col = 0; col < boardSize; col++)
-        {
-            getColor(board[row][col], color, 32);
-            printf("%s", color);
-            printf("%7s", "");
-            resetColor();
-        }
-        printf("\n");
-        for (col = 0; col < boardSize; col++)
-        {
-            getColor(board[row][col], color, 32);
-            printf("%s", color);
-            if (board[row][col])
-            {
-                char valStr[8];
-                sprintf_s(valStr, 8, "%d", board[row][col]);
-                int len = strlen(valStr);
-                // printf("%*s%s%*s", 7 - (7 - len) / 2 - len, "", valStr, (7 - len) / 2, "");
-                // 这样感觉更顺眼
-                printf("%*s%s%*s", (7 - len) / 2, "", valStr, 7 - (7 - len) / 2 - len, "");
-            }
-            else
-            {
-                printf("%3s.%3s", "", "");
-            }
-            resetColor();
-        }
-        printf("\n");
-        for (col = 0; col < boardSize; col++)
-        {
-            getColor(board[row][col], color, 32);
-            printf("%s", color);
-            printf("%7s", "");
-            resetColor();
-        }
-        printf("\n");
-    }
-    printf("\nControl: WSAD or ←,↑,→,↓");
-    printf("\n         Q to return");
-=======
 	system("cls");
 	// DEBUG
 	printf("[*] canSlide: %d\n", canSlide(board));
@@ -381,7 +306,7 @@ void displayBoard(MATRIX board)
 				sprintf_s(valStr, 8, "%d", board[row][col]);
 				int len = strlen(valStr);
 				// printf("%*s%s%*s", 7 - (7 - len) / 2 - len, "", valStr, (7 - len) / 2, "");
-				// 这样感觉更顺眼
+				// ?????о??????
 				printf("%*s%s%*s", (7 - len) / 2, "", valStr, 7 - (7 - len) / 2 - len, "");
 			}
 			else
@@ -400,9 +325,8 @@ void displayBoard(MATRIX board)
 		}
 		printf("\n");
 	}
-	printf("\nControl: WSAD or ←,↑,→,↓");
+	printf("\nControl: WSAD or ??,??,??,??");
 	printf("\n         Q to return");
->>>>>>> testCommonLogical
 }
 
 void getColor(int val, char* buffer, int length)
@@ -431,83 +355,6 @@ void resetColor()
 
 BOOL runGame(MATRIX board, BOOL newGame)
 {
-<<<<<<< HEAD
-    BOOL newValNeeded = TRUE;
-    int key, key_extra;
-    if (newGame)
-        addNewValToBoard(board);
-    displayBoard(board);
-    while (1)
-    {
-        newValNeeded = TRUE;
-        key = _getch();
-        switch (key)
-        {
-        case 'w':
-        case 'W':
-            slideUp(board);
-            break;
-        case 's':
-        case 'S':
-            slideDown(board);
-            break;
-        case 'A':
-        case 'a':
-            slideLeft(board);
-            break;
-        case 'D':
-        case 'd':
-            slideRight(board);
-            break;
-        case 'Q':
-        case 'q':
-            return FALSE;
-        case 0xE0:
-            switch (key_extra = _getch())
-            {
-            case 72:
-                slideUp(board);
-                break;
-            case 80:
-                slideDown(board);
-                break;
-            case 75:
-                slideLeft(board);
-                break;
-            case 77:
-                slideRight(board);
-                break;
-            default:
-                newValNeeded = FALSE;
-            }
-            break;
-        default:
-            newValNeeded = FALSE;
-            fflush(stdin);
-            break;
-        }
-        if (newValNeeded)
-        {
-            addNewValToBoard(board);
-        }
-        if (restZeros < 1){
-            break;
-        }
-        displayBoard(board);
-    }
-
-    // system("cls");
-    int paddinglen = (boardSize * 7) / 2 - 6;
-    paddinglen = paddinglen > 0 ? paddinglen : 0;
-    printf("\n\n%*s- GAME OVER -\n\n", paddinglen, "");
-    printf("your score: %-d\nPRESS ANY KEY\n", currentScore);
-    key = _getch();
-    // When player holds a direction key until gameover, sleep for 0.7s
-    // makes it more natural
-    Sleep(700);
-    fflush(stdin);
-    return TRUE;
-=======
 	BOOL isDirectionKey = TRUE;
 	int key = 0, key_extra;
 	if (newGame)
@@ -586,7 +433,6 @@ BOOL runGame(MATRIX board, BOOL newGame)
 	Sleep(700);
 	fflush(stdin);
 	return TRUE;
->>>>>>> testCommonLogical
 }
 
 int menuSelection(const char** options, int numOfOptions)
@@ -615,7 +461,7 @@ int menuSelection(const char** options, int numOfOptions)
 			selection = (selection + 1) % numOfOptions;
 			continue;
 		case 0xE0:
-			// ↑, ↓ keys generates a key and a key_extra
+			// ??, ?? keys generates a key and a key_extra
 			switch (key_extra = _getch())
 			{
 			case 72:
@@ -695,9 +541,9 @@ int settingsMenu() {
 	while (!confirm) {
 		system("cls");
 		printf("\n\n");
-		printf("\t           %s\n", newSize < 8 ? "△":" ");
-		printf("\t桌面大小   %2d\n", newSize);
-		printf("\t           %s\n", newSize > 2? "▽" : " ");
+		printf("\t           %s\n", newSize < 8 ? "??":" ");
+		printf("\t?????С   %2d\n", newSize);
+		printf("\t           %s\n", newSize > 2? "??" : " ");
 		key = _getch();
 		switch (key)
 		{
@@ -714,7 +560,7 @@ int settingsMenu() {
 			}
 			break;
 		case 0xE0:
-			// ↑, ↓ keys generates a key and a key_extra
+			// ??, ?? keys generates a key and a key_extra
 			switch (key_extra = _getch())
 			{
 			case 72:
@@ -734,12 +580,12 @@ int settingsMenu() {
 		}
 	}
 	if (newSize == boardSize) {
-		printf("设置未更改");
+		printf("????δ????");
 	}
 	else {
 		settings.boardSize = newSize;
 		saveSettings(settings);
-		printf("更改将在下次游戏时生效");
+		printf("????????????????Ч");
 	}
 	Sleep(1000);
 	return newSize == boardSize;
@@ -765,7 +611,7 @@ BOOL GameInit(OUT PMATRIX pBoard, OUT PENV* pOldEnv)
 	scoreRecord = 0; // assuming the highest score record
 	currentScore = 0;
 
-	return SetConsoleTitleW(L"进击的2048");
+	return SetConsoleTitleW(L"??????2048");
 }
 
 BOOL restoreEnv(IN PENV oldEnv)

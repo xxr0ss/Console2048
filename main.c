@@ -4,7 +4,6 @@
 #include <windows.h>
 #include <conio.h>
 #include "game.h"
-#include "gameMenu.h"
 
 // NOTE: maybe it's better to set "PMATRIX board" as global variable;
 
@@ -24,43 +23,18 @@ void useTestCase(MATRIX board) {
 	memcpy_s(board[0], size, testCase, size);
 }
 
-/* Data control */
-// int saveRecord();
-// int readRecord();
-const char* filename = ".\\settings";
-int saveSettings(PSETTINGS settings);
-int readSettings(OUT PSETTINGS psettings_recv);
-
-/* Funtions act on the board */
-MATRIX createEmptyBoard();
-void freeBoard(MATRIX board);
-void rotateBoardClockwise(MATRIX board, int times);
-int slideLeft(MATRIX board);
-int slideRight(MATRIX board);
-int slideUp(MATRIX board);
-int slideDown(MATRIX board);
-void clearBoard(MATRIX board);
-BOOL canSlide(MATRIX board);
-BOOL addNewValToBoard(MATRIX board);
-
-/* Display related */
-void getColor(int val, char* buffer, int length);
-void resetColor();
-void displayBoard(MATRIX Board);
-int calCurrentScore(MATRIX Board);
-int settingsMenu();
-
-/* Game environment related */
-BOOL GameInit(OUT PMATRIX* pBoard, OUT PENV* pOldEnv);
-BOOL runGame(MATRIX board, BOOL newGame);
-void lookUpRank();
-
 int saveSettings(SETTINGS settings) {
     FILE* settingsFile = fopen(filename, "wb");
 	if (settingsFile == NULL) {
 		printf("错误：设置无法保存！");
 		return 0;
 	}
+	// check setting values
+	if (settings.boardSize > 8)
+		settings.boardSize = 8;
+	else if (settings.boardSize < 2)
+		settings.boardSize = 2; 
+
 	fwrite((void*)&settings, sizeof(SETTINGS), 1, settingsFile);
 	fclose(settingsFile);
 	return 1;
@@ -563,9 +537,9 @@ int settingsMenu() {
 	while (!confirm) {
 		system("cls");
 		printf("\n\n");
-		printf("\t           %s\n", newSize < 8 ? "△":" ");
+		printf("\t            %s\n", newSize < 8 ? "△":" ");
 		printf("\t桌面大小   %2d\n", newSize);
-		printf("\t           %s\n", newSize > 2? "▽" : " ");
+		printf("\t            %s\n", newSize > 2? "▽" : " ");
 		key = _getch();
 		switch (key)
 		{
@@ -602,7 +576,7 @@ int settingsMenu() {
 		}
 	}
 	if (newSize == boardSize) {
-		printf("设置未更改");
+		printf("设置未更改!");
 	}
 	else {
 		settings.boardSize = newSize;
@@ -631,8 +605,6 @@ BOOL GameInit(OUT PMATRIX pBoard, OUT PENV* pOldEnv)
 	CONSOLE_CURSOR_INFO info = { 1, 0 }; // set cursor invisible
 	SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &info);
 
-	// TODO: add "read score record from file" function
-	// Read record from file, and maybe decrypt it before read record
 	scoreRecord = 0; // assuming the highest score record
 	currentScore = 0;
 

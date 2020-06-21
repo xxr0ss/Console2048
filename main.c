@@ -13,6 +13,10 @@ int currentScore;
 int scoreRecord;
 int restZeros;
 
+SETTINGS defaultSettings = {
+    4 // boardSize
+};
+
 // DEBUG
 int testCase[] = { 7, 8, 9, 10, 6, 7, 8, 9, 5,6,7,8, 4,5,6,7 };
 void useTestCase(MATRIX board) {
@@ -21,10 +25,11 @@ void useTestCase(MATRIX board) {
 }
 
 /* Data control */
-int saveRecord();
-int readRecord();
-int saveSettings(SETTINGS settings);
-SETTINGS readSettings();
+// int saveRecord();
+// int readRecord();
+const char* filename = ".\\settings";
+int saveSettings(PSETTINGS settings);
+int readSettings(OUT PSETTINGS psettings_recv);
 
 /* Funtions act on the board */
 MATRIX createEmptyBoard();
@@ -50,8 +55,30 @@ BOOL GameInit(OUT PMATRIX* pBoard, OUT PENV* pOldEnv);
 BOOL runGame(MATRIX board, BOOL newGame);
 void lookUpRank();
 
-int saveSettings(s) {
+int saveSettings(SETTINGS settings) {
+    FILE* settingsFile = fopen(filename, "wb");
+	if (settingsFile == NULL) {
+		printf("错误：设置无法保存！");
+		return 0;
+	}
+	fwrite((void*)&settings, sizeof(SETTINGS), 1, settingsFile);
+	fclose(settingsFile);
+	return 1;
+}
 
+int readSettings(OUT PSETTINGS psettings_recv){
+    FILE * settingsFile = fopen(filename, "rb");
+	if (!settingsFile) {
+		settingsFile = fopen(filename, "wb");
+		fwrite((void*)&defaultSettings, sizeof(SETTINGS), 1, settingsFile);
+		fclose(settingsFile);
+		printf("无配置文件，将使用默认配置。");
+		psettings_recv->boardSize = defaultSettings.boardSize;
+		return 0;
+	}
+	fread(psettings_recv, sizeof(SETTINGS), 1, settingsFile);
+	fclose(settingsFile);
+	return 1;
 }
 
 MATRIX createEmptyBoard()
@@ -588,6 +615,9 @@ int settingsMenu() {
 
 BOOL GameInit(OUT PMATRIX pBoard, OUT PENV* pOldEnv)
 {
+    SETTINGS settings;
+    readSettings(&settings);
+    boardSize = settings.boardSize;
 	*pBoard = createEmptyBoard();
 
 	srand((unsigned)time(NULL));

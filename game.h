@@ -43,7 +43,7 @@ void displayBoard(MATRIX Board);
 int settingsMenu();
 
 /* Game environment related */
-BOOL gameInit(OUT PMATRIX pBoard, OUT PENV* pOldEnv);
+BOOL initialize(OUT PMATRIX pBoard, OUT PENV* pOldEnv);
 BOOL runGame(MATRIX board, BOOL newGame);
 void gameOver();
 int calCurrentScore(MATRIX Board);

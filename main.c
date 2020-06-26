@@ -596,7 +596,7 @@ int settingsMenu() {
 	return newSize == boardSize;
 }
 
-BOOL gameInit(OUT PMATRIX pBoard, OUT PENV* pOldEnv)
+BOOL initialize(OUT PMATRIX pBoard, OUT PENV* pOldEnv)
 {
 	// hide cursor after save origin configuration
 	PENV oldEnv = (PENV)malloc(sizeof(ENV));
@@ -634,7 +634,7 @@ int main()
 	MATRIX board;
 	PENV oldEnv;
 
-	if (!gameInit(&board, &oldEnv))
+	if (!initialize(&board, &oldEnv))
 		return EXIT_FAILURE;
 
 	homeMenu(board);

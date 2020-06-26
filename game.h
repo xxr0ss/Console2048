@@ -8,21 +8,22 @@
 
 
 // Origin environment
+typedef struct _CONFIG {
+	int boardSize;
+}CONFIG, *PCONFIG;
+
 typedef struct _ENV{
 	CONSOLE_CURSOR_INFO cursorInfo;
 } ENV, *PENV;
 
-typedef struct _SETTINGS {
-	int boardSize;
-}SETTINGS, *PSETTINGS;
 
 typedef int **MATRIX;
 typedef MATRIX *PMATRIX;
 
 /* Data control */
 const char* filename = ".\\settings";
-int saveSettings(SETTINGS settings);
-int readSettings(OUT PSETTINGS psettings_recv);
+int saveSettings(CONFIG config);
+int readSettings(OUT PCONFIG pConfig_recv);
 
 /* Funtions act on the board */
 MATRIX createEmptyBoard();

@@ -5,14 +5,13 @@
 #include <conio.h>
 #include "game.h"
 
-// NOTE: maybe it's better to set "PMATRIX board" as global variable;
 
 int boardSize = 4;
 int currentScore;
 int scoreRecord;
 int restZeros;
 
-SETTINGS defaultSettings = {
+CONFIG defaultConfig = {
     4 // boardSize
 };
 
@@ -23,34 +22,32 @@ void useTestCase(MATRIX board) {
 	memcpy_s(board[0], size, testCase, size);
 }
 
-int saveSettings(SETTINGS settings) {
+int saveSettings(CONFIG config) {
     FILE* settingsFile = fopen(filename, "wb");
 	if (settingsFile == NULL) {
-		printf("错误：设置无法保存！");
-		return 0;
+		return 0; // cannot save
 	}
-	// check setting values
-	if (settings.boardSize > 8)
-		settings.boardSize = 8;
-	else if (settings.boardSize < 2)
-		settings.boardSize = 2; 
+	// check configuration values
+	if (config.boardSize > 8)
+		config.boardSize = 8;
+	else if (config.boardSize < 2)
+		config.boardSize = 2; 
 
-	fwrite((void*)&settings, sizeof(SETTINGS), 1, settingsFile);
+	fwrite((void*)&config, sizeof(CONFIG), 1, settingsFile);
 	fclose(settingsFile);
 	return 1;
 }
 
-int readSettings(OUT PSETTINGS psettings_recv){
+int readSettings(OUT PCONFIG pConfig_recv){
     FILE * settingsFile = fopen(filename, "rb");
 	if (!settingsFile) {
 		settingsFile = fopen(filename, "wb");
-		fwrite((void*)&defaultSettings, sizeof(SETTINGS), 1, settingsFile);
+		fwrite((void*)&defaultConfig, sizeof(CONFIG), 1, settingsFile);
 		fclose(settingsFile);
-		printf("无配置文件，将使用默认配置。");
-		psettings_recv->boardSize = defaultSettings.boardSize;
+		pConfig_recv->boardSize = defaultConfig.boardSize;
 		return 0;
 	}
-	fread(psettings_recv, sizeof(SETTINGS), 1, settingsFile);
+	fread(pConfig_recv, sizeof(CONFIG), 1, settingsFile);
 	fclose(settingsFile);
 	return 1;
 }
@@ -530,7 +527,7 @@ BOOL homeMenu(MATRIX board)
 }
 
 int settingsMenu() {
-	SETTINGS settings;
+	CONFIG config;
 	int key, key_extra;
 	int newSize = boardSize;
 	BOOL confirm = FALSE;
@@ -579,9 +576,11 @@ int settingsMenu() {
 		printf("设置未更改!");
 	}
 	else {
-		settings.boardSize = newSize;
-		saveSettings(settings);
-		printf("更改将在下次游戏时生效， 正在返回主界面");
+		config.boardSize = newSize;
+		if(saveSettings(config) == 0)
+            printf("错误：设置无法保存！");
+        else
+            printf("更改将在下次游戏时生效， 正在返回主界面");
 	}
 	Sleep(1000);
 	return newSize == boardSize;
@@ -589,18 +588,21 @@ int settingsMenu() {
 
 BOOL GameInit(OUT PMATRIX pBoard, OUT PENV* pOldEnv)
 {
-    SETTINGS settings;
-    readSettings(&settings);
-    boardSize = settings.boardSize;
+	// hide cursor after save origin configuration
+	PENV oldEnv = (PENV)malloc(sizeof(ENV));
+	GetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &oldEnv->cursorInfo);
+	*pOldEnv = oldEnv;
+
+    CONFIG config;
+    if(readSettings(&config) == 0){
+        printf("无配置文件，已使用默认配置。");
+    }
+    boardSize = config.boardSize;
 	*pBoard = createEmptyBoard();
 
 	srand((unsigned)time(NULL));
 	restZeros = boardSize * boardSize;
 
-	// hide cursor after save origin settings
-	PENV oldEnv = (PENV)malloc(sizeof(ENV));
-	GetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &oldEnv->cursorInfo);
-	*pOldEnv = oldEnv;
 
 	CONSOLE_CURSOR_INFO info = { 1, 0 }; // set cursor invisible
 	SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &info);

@@ -47,3 +47,4 @@ int settingsMenu();
 /* Game environment related */
 BOOL GameInit(OUT PMATRIX pBoard, OUT PENV* pOldEnv);
 BOOL runGame(MATRIX board, BOOL newGame);
+void gameOver();

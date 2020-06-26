@@ -189,34 +189,6 @@ int slideRight(MATRIX board)
 	return restZeros;
 }
 
-BOOL canSlide(const MATRIX board)
-{
-	// TODO: write test cases
-	BOOL result = FALSE;
-	int originRestZeros = restZeros;
-	MATRIX testBoard = createEmptyBoard();
-	int rotateTimes = 0;
-	int boardMemSize = (boardSize * boardSize) * sizeof(int);
-	do
-	{
-		memcpy_s(testBoard[0], boardMemSize,
-			board[0], boardMemSize);
-		rotateBoardClockwise(testBoard, rotateTimes);
-		slideUp(testBoard);
-		rotateBoardClockwise(testBoard, 4 - rotateTimes);
-		if (memcmp(testBoard[0], board[0], boardMemSize))
-		{
-			// when got one direction that the board will have different
-			// restZeros, player can slide;
-			result = TRUE;
-			break;
-		}
-	} while (rotateTimes++ < 3);
-
-	freeBoard(testBoard);
-	restZeros = originRestZeros;
-	return result;
-}
 
 BOOL addNewValToBoard(MATRIX board)
 {
@@ -249,8 +221,36 @@ void clearBoard(MATRIX board)
 	for (int i = 0; i < boardSize; i++)
 		memset(board[i], 0, sizeof(int) * boardSize);
 	restZeros = boardSize * boardSize;
-	// TODO: save current scure
 	currentScore = 0;
+}
+
+
+BOOL canSlide(const MATRIX board)
+{
+	BOOL result = FALSE;
+	int originRestZeros = restZeros;
+	MATRIX testBoard = createEmptyBoard();
+	int rotateTimes = 0;
+	int boardMemSize = (boardSize * boardSize) * sizeof(int);
+	do
+	{
+		memcpy_s(testBoard[0], boardMemSize,
+			board[0], boardMemSize);
+		rotateBoardClockwise(testBoard, rotateTimes);
+		slideUp(testBoard);
+		rotateBoardClockwise(testBoard, 4 - rotateTimes);
+		if (memcmp(testBoard[0], board[0], boardMemSize))
+		{
+			// when got one direction that the board will have different
+			// restZeros, player can slide;
+			result = TRUE;
+			break;
+		}
+	} while (rotateTimes++ < 3);
+
+	freeBoard(testBoard);
+	restZeros = originRestZeros;
+	return result;
 }
 
 int calCurrentScore(MATRIX board)
@@ -270,11 +270,36 @@ int calCurrentScore(MATRIX board)
 	return currentScore;
 }
 
+
+void getColor(int val, char* buffer, int length)
+{
+	UINT8 color = 0;
+	UINT8 colorPairs[] = { 255, 8, 255, 1, 255, 2, 255, 3, 255, 4, 255, 5,
+						  255, 6, 255, 7, 9, 0, 10, 0, 11, 0, 12, 0, 13,
+						  0, 14, 0, 255, 0, 255, 0 }; // (f color, b color) pairs
+	if (val)
+	{
+		color = 0;
+		while ((val & 1) ^ 1)
+		{
+			val >>= 1;
+			color += 2;
+		}
+	}
+	sprintf_s(buffer, length, "\033[38;5;%d;48;5;%dm",
+		colorPairs[color], colorPairs[color + 1]);
+}
+
+void resetColor()
+{
+	printf("\033[m");
+}
+
 void displayBoard(MATRIX board)
 {
 	system("cls");
 	// DEBUG
-	printf("[*] canSlide: %d\n", canSlide(board));
+	// printf("[*] canSlide: %d\n", canSlide(board));
 
 	currentScore = calCurrentScore(board);
 	scoreRecord = currentScore > scoreRecord ? currentScore : scoreRecord;
@@ -328,30 +353,6 @@ void displayBoard(MATRIX board)
 	}
 	printf("\nControl: WSAD or ¡û,¡ü,¡ú,¡ý");
 	printf("\n         Q to return");
-}
-
-void getColor(int val, char* buffer, int length)
-{
-	UINT8 color = 0;
-	UINT8 colorPairs[] = { 255, 8, 255, 1, 255, 2, 255, 3, 255, 4, 255, 5,
-						  255, 6, 255, 7, 9, 0, 10, 0, 11, 0, 12, 0, 13,
-						  0, 14, 0, 255, 0, 255, 0 }; // (f color, b color) pairs
-	if (val)
-	{
-		color = 0;
-		while ((val & 1) ^ 1)
-		{
-			val >>= 1;
-			color += 2;
-		}
-	}
-	sprintf_s(buffer, length, "\033[38;5;%d;48;5;%dm",
-		colorPairs[color], colorPairs[color + 1]);
-}
-
-void resetColor()
-{
-	printf("\033[m");
 }
 
 BOOL runGame(MATRIX board, BOOL newGame)
@@ -424,63 +425,21 @@ BOOL runGame(MATRIX board, BOOL newGame)
 		}
 	}
 
-	// system("cls");
+    gameOver();
+	return TRUE;
+}
+
+void gameOver(){
+    // system("cls");
 	int paddinglen = (boardSize * 7) / 2 - 6;
 	paddinglen = paddinglen > 0 ? paddinglen : 0;
 	printf("\n\n%*s- GAME OVER -\n\n", paddinglen, "");
 	printf("your score: %-d\nPRESS ANY KEY\n", currentScore);
-	key = _getch();
+	int key = _getch();
 	// When player holds a direction key until gameover, sleep for 0.7s
 	// makes it more natural
 	Sleep(700);
 	fflush(stdin);
-	return TRUE;
-}
-
-int menuSelection(const char** options, int numOfOptions)
-{
-	int selection = 0;
-	int key;
-	int key_extra;
-	const char* selection_char = ">";
-	do
-	{
-		system("cls");
-		for (int i = 0; i < numOfOptions; i++)
-		{
-			printf("\n\n");
-			printf("\t%s %s\n", i == selection ? selection_char : " ", options[i]);
-		}
-		key = _getch();
-		switch (key)
-		{
-		case 'w':
-		case 'W':
-			selection = (numOfOptions + selection - 1) % numOfOptions;
-			continue;
-		case 's':
-		case 'S':
-			selection = (selection + 1) % numOfOptions;
-			continue;
-		case 0xE0:
-			// ¡ü, ¡ý keys generates a key and a key_extra
-			switch (key_extra = _getch())
-			{
-			case 72:
-				selection = (numOfOptions + selection - 1) % numOfOptions;
-				break;
-			case 80:
-				selection = (selection + 1) % numOfOptions;
-				break;
-			default:
-				break;
-			}
-			continue;
-		default:
-			continue;
-		}
-	} while (key != VK_RETURN); // press enter to confirm selection
-	return selection;
 }
 
 BOOL homeMenu(MATRIX board)
@@ -528,6 +487,53 @@ BOOL homeMenu(MATRIX board)
 		}
 	}
 	return TRUE;
+}
+
+
+int menuSelection(const char** options, int numOfOptions)
+{
+	int selection = 0;
+	int key;
+	int key_extra;
+	const char* selection_char = ">";
+	do
+	{
+		system("cls");
+		for (int i = 0; i < numOfOptions; i++)
+		{
+			printf("\n\n");
+			printf("\t%s %s\n", i == selection ? selection_char : " ", options[i]);
+		}
+		key = _getch();
+		switch (key)
+		{
+		case 'w':
+		case 'W':
+			selection = (numOfOptions + selection - 1) % numOfOptions;
+			continue;
+		case 's':
+		case 'S':
+			selection = (selection + 1) % numOfOptions;
+			continue;
+		case 0xE0:
+			// ¡ü, ¡ý keys generates a key and a key_extra
+			switch (key_extra = _getch())
+			{
+			case 72:
+				selection = (numOfOptions + selection - 1) % numOfOptions;
+				break;
+			case 80:
+				selection = (selection + 1) % numOfOptions;
+				break;
+			default:
+				break;
+			}
+			continue;
+		default:
+			continue;
+		}
+	} while (key != VK_RETURN); // press enter to confirm selection
+	return selection;
 }
 
 int settingsMenu() {

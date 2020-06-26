@@ -16,7 +16,10 @@ CONFIG defaultConfig = {
 };
 
 // DEBUG
-int testCase[] = { 7, 8, 9, 10, 6, 7, 8, 9, 5,6,7,8, 4,5,6,7 };
+int testCase[] = { 2, 8, 64, 128, 
+					8, 4, 32, 6,
+					4, 8, 4, 2,
+					2, 4, 2, 8 };
 void useTestCase(MATRIX board) {
 	int size = boardSize * boardSize * sizeof(int);
 	memcpy_s(board[0], size, testCase, size);
@@ -74,7 +77,7 @@ void freeBoard(MATRIX board)
 void rotateBoardClockwise(MATRIX board, int times)
 {
 	// rotate square matrix, (not only 4 x 4 square)
-	if (0 == times || 4 == times)
+	if (times % 4 == 0)
 	{
 		return;
 	}
@@ -407,6 +410,7 @@ BOOL runGame(MATRIX board, BOOL newGame)
 			fflush(stdin);
 			break;
 		}
+		
 		if (isDirectionKey)
 		{
 			displayBoard(board);
@@ -607,7 +611,7 @@ BOOL GameInit(OUT PMATRIX pBoard, OUT PENV* pOldEnv)
 	CONSOLE_CURSOR_INFO info = { 1, 0 }; // set cursor invisible
 	SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &info);
 
-	scoreRecord = 0; // assuming the highest score record
+	scoreRecord = 0;
 	currentScore = 0;
 
 	return SetConsoleTitleW(L"½ø»÷µÄ2048");

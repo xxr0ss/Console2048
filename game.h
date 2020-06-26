@@ -1,11 +1,9 @@
 #include <Windows.h>
 #include "gameMenu.h"
 
-// Colors
-#define RED_BG "\033[1;37;41m"
-#define GRAY_BG "\033[1;30;47m"
-#define SET_DEFAULT "\033[0m"
 
+typedef int** MATRIX;
+typedef MATRIX* PMATRIX;
 
 // Origin environment
 typedef struct _CONFIG {
@@ -16,9 +14,6 @@ typedef struct _ENV{
 	CONSOLE_CURSOR_INFO cursorInfo;
 } ENV, *PENV;
 
-
-typedef int **MATRIX;
-typedef MATRIX *PMATRIX;
 
 /* Data control */
 const char* filename = ".\\settings";
@@ -38,13 +33,17 @@ BOOL canSlide(MATRIX board);
 BOOL addNewValToBoard(MATRIX board);
 
 /* Display related */
+// Colors
+#define RED_BG "\033[1;37;41m"
+#define GRAY_BG "\033[1;30;47m"
+#define SET_DEFAULT "\033[0m"
 void getColor(int val, char* buffer, int length);
 void resetColor();
 void displayBoard(MATRIX Board);
-int calCurrentScore(MATRIX Board);
 int settingsMenu();
 
 /* Game environment related */
-BOOL GameInit(OUT PMATRIX pBoard, OUT PENV* pOldEnv);
+BOOL gameInit(OUT PMATRIX pBoard, OUT PENV* pOldEnv);
 BOOL runGame(MATRIX board, BOOL newGame);
 void gameOver();
+int calCurrentScore(MATRIX Board);

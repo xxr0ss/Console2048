@@ -448,15 +448,17 @@ BOOL homeMenu(MATRIX board)
 	BOOL gameOver = FALSE;
 	while (1)
 	{
-		if (alreadyStarted && !gameOver)
+		if (alreadyStarted)
 		{
 			switch (menuSelection(allOptions, 4))
 			{
 			case 0:
 				clearBoard(board);
 				gameOver = runGame(board, TRUE);
+                alreadyStarted = gameOver ? FALSE : TRUE;
 				break;
 			case 1:
+                // continue game
 				runGame(board, FALSE);
 				break;
 			case 2:
@@ -474,6 +476,7 @@ BOOL homeMenu(MATRIX board)
 				clearBoard(board);
 				//useTestCase(board);
 				gameOver = runGame(board, TRUE);
+                alreadyStarted = gameOver ? FALSE : TRUE;
 				break;
 			case 1:
 				settingsMenu();
@@ -483,7 +486,7 @@ BOOL homeMenu(MATRIX board)
 			default:
 				break;
 			}
-			alreadyStarted = TRUE;
+			// alreadyStarted = TRUE;
 		}
 	}
 	return TRUE;

@@ -11,7 +11,7 @@ int currentScore;
 int scoreRecord;
 int restZeros;
 
-CONFIG defaultConfig = {
+const CONFIG defaultConfig = {
     4 // boardSize
 };
 
@@ -24,6 +24,8 @@ void useTestCase(MATRIX board) {
 	int size = boardSize * boardSize * sizeof(int);
 	memcpy_s(board[0], size, testCase, size);
 }
+
+
 
 int saveSettings(CONFIG config) {
     FILE* settingsFile = fopen(filename, "wb");
@@ -54,6 +56,8 @@ int readSettings(OUT PCONFIG pConfig_recv){
 	fclose(settingsFile);
 	return 1;
 }
+
+
 
 MATRIX createEmptyBoard()
 {
@@ -126,7 +130,7 @@ int slideUp(MATRIX board)
 			{
 				continue;
 			}
-			// 1st non-zero number fpund
+			// 1st non-zero number found
 			columnNonZeroNums[columnNumNotZero++] = board[row - 1][col];
 
 			// having made sure that nonZeroNums is not empty
@@ -147,7 +151,6 @@ int slideUp(MATRIX board)
 			}
 		}
 
-		// TODO: separate out a new function
 		// put all non-zero values in a column of the board
 		for (i = 0; i < columnNumNotZero; i++)
 		{
@@ -190,6 +193,7 @@ int slideRight(MATRIX board)
 }
 
 
+
 BOOL addNewValToBoard(MATRIX board)
 {
 	BOOL result = FALSE;
@@ -223,6 +227,7 @@ void clearBoard(MATRIX board)
 	restZeros = boardSize * boardSize;
 	currentScore = 0;
 }
+
 
 
 BOOL canSlide(const MATRIX board)
@@ -269,6 +274,7 @@ int calCurrentScore(MATRIX board)
 	}
 	return currentScore;
 }
+
 
 
 void getColor(int val, char* buffer, int length)
@@ -354,6 +360,8 @@ void displayBoard(MATRIX board)
 	printf("\nControl: WSAD or ¡û,¡ü,¡ú,¡ý");
 	printf("\n         Q to return");
 }
+
+
 
 BOOL runGame(MATRIX board, BOOL newGame)
 {
@@ -442,6 +450,8 @@ void gameOver(){
 	fflush(stdin);
 }
 
+
+
 BOOL homeMenu(MATRIX board)
 {
 	BOOL alreadyStarted = FALSE;
@@ -474,7 +484,7 @@ BOOL homeMenu(MATRIX board)
 			{
 			case 0:
 				clearBoard(board);
-				//useTestCase(board);
+				// useTestCase(board);
 				gameOver = runGame(board, TRUE);
                 alreadyStarted = gameOver ? FALSE : TRUE;
 				break;
@@ -486,12 +496,10 @@ BOOL homeMenu(MATRIX board)
 			default:
 				break;
 			}
-			// alreadyStarted = TRUE;
 		}
 	}
 	return TRUE;
 }
-
 
 int menuSelection(const char** options, int numOfOptions)
 {
@@ -598,6 +606,8 @@ int settingsMenu() {
 	Sleep(1000);
 	return newSize == boardSize;
 }
+
+
 
 BOOL initialize(OUT PMATRIX pBoard, OUT PENV* pOldEnv)
 {

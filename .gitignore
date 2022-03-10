@@ -1,16 +1,2 @@
-*.pdb
-*.obj
-*.idb
-*.log
-*.ilk
-*.db
-*.suo
-Console2048.zip
-
-x64
-Debug
-test1
-.vs
 .vscode
-test*
-settings
+build
